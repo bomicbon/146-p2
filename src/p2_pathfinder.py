@@ -1,4 +1,4 @@
-def find_path (source_point, destination_point, mesh):
+from math import sqrtdef find_path (source_point, destination_point, mesh):
     """    Searches for a path from source_point to destination_point through the mesh    Args:        source_point: starting point of the pathfinder        destination_point: the ultimate goal the pathfinder must reach        mesh: pathway constraints the path adheres to
     Returns:
-        A path (list of points) from source_point to destination_point if exists        A list of boxes explored by the algorithm    """    path = []    boxes = {}    return path, boxes.keys()
+        A path (list of points) from source_point to destination_point if exists        A list of boxes explored by the algorithm    """    path = []    boxes = {}    queue = []    dist = {}    dist[source_point] = 0    heappush(queue, source_point)    current_point = source_point    while len(queue) is not 0        current_box = heappop(queue)        if current_point == destination_point            break        for next_box in mesh['adj'][current_box]            new_cost = dist[current] +            priority = new_cost + distance(destination_point, current_point)    return path, boxes.keys()def distance(p1, p2):    return sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
