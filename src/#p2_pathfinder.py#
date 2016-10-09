@@ -1,0 +1,113 @@
+from math import sqrt
+"""Searches for a path from source_point to destination_point through the mesh
+
+    Args:
+        source_point: starting point of the pathfinder
+        destination_point: the ultimate goal the pathfinder must reach
+        mesh: pathway constraints the path adheres to
+
+    Returns:
+
+        A path (list of points) from source_point to destination_point if exists
+        A list of boxes explored by the algorithm
+"""
+path = [] # list that holds all boxes passed through
+boxes = {} # dict that maps boxes to all adjacent / explored boxes
+queue = [] # heap that contains boxes to explore
+dist = {} # dict that maps boxes to path cost
+
+for first_box in mesh['boxes']: #first_box not actually first box
+        if source_point[0] >= first_box[0] and source_point[1] >= first_box[2] and source_point[0] <= first_box[1] and source_point[1] <= first_box[3]:
+            current_box = first_box
+            dist[first_box] = 0
+
+heappush(queue, (0, current_box))
+current_point = source_point
+
+    while len(queue) is not 0:
+        current_box = heappop(queue)[1]
+
+        if current_point == destination_point:
+            break
+
+        boxes[current_box] = []
+
+        for next_box in mesh['adj'][current_box]:
+            adjacent = adj_edge(current_box, next_box)
+            temp_point = shortest_to_adj(current_point, adjacent[0], adjacent[1])
+            new_cost = dist[current_box] + distance(current_point, temp_point)
+            boxes[current_box].append(next_box)
+
+            if next_box not in dist or new_cost < dist[next_box]:
+                dist[next_box] = new_cost
+                priority = new_cost + distance(destination_point, temp_point)
+                heappush(queue, (priority, next_box)) #Left off here
+                path.append(current_box)
+                current_point = temp_point
+
+    return path, boxes.keys()
+
+def adj_edge(b1, b2):
+
+    """
+    Args:
+        b1: origin box
+        b2: other box
+    Returns:
+        A list of two tuples, each with two values.  The two tuples represent two endpoints
+        of an adjacent edge between the two boxes
+    """
+
+    edge = None
+    xBorder = [max(b1[0], b2[0]), min(b1[2], b2[2])]
+    yBorder = [max(b1[1], b2[1]), min(b1[3], b2[3])]
+
+    if xBorder[0] == 0 and xBorder[1] == 0:
+        if b1[1] == b2[3]: #below
+            edge = [(xBorder[0], b1[1]), (xBorder[1], b1[1])]
+        else: #above
+            edge = [(xBorder[0], b1[3]), (xBorder[1], b1[3])]
+    else:
+        if b1[0] == b2[2]: #left
+            edge = [(b1[0], yBorder[0]), (b1[0], yBorder[1])]
+        else: #right
+            edge = [(b1[2], yBorder[0]), (b1[2], yBorder[1])]
+    return edge
+
+
+def shortest_to_adj(point, l1, l2):
+
+    """
+    Args:
+        point: starting point
+        l1: first endpoint of the edge
+        l2: second endpoint of the edge
+
+    Returns:
+        A tuple that represents a point on the line that has the smallest
+        euclidean distance between itself and the starting point
+    """
+
+    line = distance(l1, l2)
+    if line == 0:
+        return distance(point, l1)
+    dot_product = ((point[0] - l1[0]) * (l2[0] - l1[0]) + (point[1] - l1[1]) * (l2[1] - l1[1])) / line
+    dp = max(0, min(1, dot_product))
+    p1 = l1[0] + dp * (l2[0] - l1[0])
+    p2 = l1[1] + dp * (l2[1] - l1[1])
+    return (p1, p2)
+
+def distance(p1, p2):
+
+    """
+    Args:
+        p1: Starting point tuple
+        p2: Destination point tuple
+
+    Returns:
+        Euclidean distance between p1 and p2
+    """
+    x = p2[0] - p1[0]
+    y = p2[1] - p1[1]
+    return sqrt((x)**2 + (y)**2)
+
